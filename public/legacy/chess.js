@@ -1,90 +1,69 @@
-screen.orientation.lock('landscape');
-
+// Get the table element by its ID
+const boardTable = document.getElementById('board');
 
 let color = {
     dark: "#88AA22",
     light: "#EEEECC"
 }
 
+// Loop through each row of the table
+for (let i = 0; i < boardTable.rows.length; i++) {
+    const row = boardTable.rows[i];
+    
+    // Loop through each cell of the row
+    for (let j = 0; j < row.cells.length; j++) {
+        const cell = row.cells[j];
+
+        let isDark = (i+j) % 2 !== 0//!rowIsEven&&columnIsEven||rowIsEven&&!columnIsEven
+
+        cell.style.backgroundColor = isDark? color.dark : color.light
+
+        cell.setAttribute("r",i)
+        cell.setAttribute("c",j)
+
+        let selectedOverlay = document.createElement("div")
+        selectedOverlay.className = "selectedOverlay"
+
+        cell.appendChild(selectedOverlay)
+    }
+}
+
 
 class Chess{
     constructor(){
-        this.boardElement = document.createElement("table")
-        this.boardElement.id = "board"
-        
         this.boardState = [
-            ['wr', 'wp', false, false, false, false, 'bp', 'br'],
-            ['wn', 'wp', false, false, false, false, 'bp', 'bn'],
-            ['wb', 'wp', false, false, false, false, 'bp', 'bb'],
-            ['wq', 'wp', false, false, false, false, 'bp', 'bq'],
-            ['wk', 'wp', false, false, false, false, 'bp', 'bk'],
-            ['wb', 'wp', false, false, false, false, 'bp', 'bb'],
-            ['wn', 'wp', false, false, false, false, 'bp', 'bn'],
-            ['wr', 'wp', false, false, false, false, 'bp', 'br']
-    ]
+            //rook     bishop queen king        night
+            ['br', 'bn', 'bb', 'bq', 'bk', 'bb', 'bn', 'br'],
+            ['bp', 'bp', 'bp', 'bp', 'bp', 'bp', 'bp', 'bp'], //pawn
+            [false, false, false, false, false, false, false, false],
+            [false, false, false, false, false, false, false, false],
+            [false, false, false, false, false, false, false, false],
+            [false, false, false, false, false, false, false, false],
+            ['wp', 'wp', 'wp', 'wp', 'wp', 'wp', 'wp', 'wp'],
+            ['wr', 'wn', 'wb', 'wq', 'wk', 'wb', 'wn', 'wr'],
+          ];
         this.selectedPiece = false;
-        this.createBoard()
+          
         
     }
-    createBoard(){
-
-        
-        for (let i = 0; i < this.boardState.length; i++) {
-
-            let rowElement = document.createElement("tr")
-            rowElement.className = "row"
-
-            this.boardElement.appendChild(rowElement)
-            
-            for (let j = 0; j < this.boardState[i].length; j++) {
-                console.log("ok")
-                let cellElement = document.createElement("td")
-
-                let isDark = (i+j) % 2 == 0
-        
-                cellElement.style.backgroundColor = isDark? color.dark : color.light
-        
-                cellElement.setAttribute("r",i)
-                cellElement.setAttribute("c",j)
-        
-                let selectedOverlay = document.createElement("div")
-                selectedOverlay.className = "selectedOverlay"
-        
-                cellElement.appendChild(selectedOverlay)
-
-                rowElement.appendChild(cellElement)
-            }
-        }
-        
-        document.body.appendChild(this.boardElement)
-
-    }
-
     update(){
         
         // Loop through each row of the table
-        for (let i = 0; i < this.boardElement.rows.length; i++) {
-            const row = this.boardElement.rows[i];
+        for (let i = 0; i < boardTable.rows.length; i++) {
+            const row = boardTable.rows[i];
             
             // Loop through each cell of the row
             for (let j = 0; j < row.cells.length; j++) {
             const cell = row.cells[j];
             const cellState = this.boardState[i][j]
-            if(cellState){
-                let imgElement = document.createElement("img")
-                imgElement.src = `pieces/${cellState}.png`
-                cell.appendChild(imgElement)
-            }
-            else if(cell.firstChild){
-                cell.firstChild.remove()
-            }
             
+            cell.style.backgroundImage = cellState? `url('pieces/${cellState}.png')`:"none"
             }
         }
     }
     selectPiece(r,c){
         if(!this.selectedPiece){
-            this.boardElement.rows[r].cells[c].firstChild.style.display="block";
+            boardTable.rows[r].cells[c].firstChild.style.display="block";
     
             this.selectedPiece = {r:r,c:c}
         }
@@ -93,7 +72,7 @@ class Chess{
         this.boardState[r][c] = this.boardState[this.selectedPiece.r][this.selectedPiece.c]
         this.boardState[this.selectedPiece.r][this.selectedPiece.c] = false
 
-        this.boardElement.rows[this.selectedPiece.r].cells[this.selectedPiece.c].firstChild.style.display="none";
+        boardTable.rows[this.selectedPiece.r].cells[this.selectedPiece.c].firstChild.style.display="none";
         this.selectedPiece = false
         this.update()
     }

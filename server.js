@@ -9,7 +9,7 @@ const io = socketIo(server);
 // Serve static files (HTML, CSS, JS)
 app.use(express.static(__dirname + '/public'));
 
-var users = [];
+var players = 0;
 
 io.on('connection', (socket) => {
   console.log('A user connected');
@@ -17,15 +17,12 @@ io.on('connection', (socket) => {
   const userId = socket.id;
 
   socket.on("newPlayer", (data) => {
-    /*player = data
-    player.id = userId
-    users.push(player);*/
-    users.push(data);
-    io.emit("newPlayer", data);
+    players++;
+    io.emit("newPlayer", players);
   });
 
   socket.on("joined", () => {
-    socket.emit("joined", users);
+    socket.emit("joined", players);
   });
 
   // Create a unique user ID for the connected user
@@ -45,15 +42,15 @@ io.on('connection', (socket) => {
 
   socket.on('updatePlayer', (data) => {
     let id = data.id;
-    users[id].x = data.x;
-    users[id].y = data.y;
+    players[id].x = data.x;
+    players[id].y = data.y;
 
-    io.emit("updatePlayer", users)
+    io.emit("updatePlayer", players)
   })
 
   socket.on('catchBall', (data) => {
     let id = data.id;
-    users[id].score++
+    players[id].score++
     io.emit("catchBall", data)
   })
 
@@ -64,10 +61,10 @@ io.on('connection', (socket) => {
   // Handle user disconnection
   socket.on('disconnect', () => {
     console.log('A user disconnected');
-    delete users[userId];
+    delete players[userId];
 
     // Notify all clients about the disconnected user
-    io.emit('update', users);
+    io.emit('update', players);
   });
 });
     

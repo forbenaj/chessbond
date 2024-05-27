@@ -1,5 +1,4 @@
-screen.orientation.lock('landscape');
-
+let players = 0
 
 let color = {
     dark: "#88AA22",
@@ -37,7 +36,6 @@ class Chess{
             this.boardElement.appendChild(rowElement)
             
             for (let j = 0; j < this.boardState[i].length; j++) {
-                console.log("ok")
                 let cellElement = document.createElement("td")
 
                 let isDark = (i+j) % 2 == 0
@@ -46,10 +44,13 @@ class Chess{
         
                 cellElement.setAttribute("r",i)
                 cellElement.setAttribute("c",j)
+
+                let imgElement = document.createElement("img")                
         
                 let selectedOverlay = document.createElement("div")
                 selectedOverlay.className = "selectedOverlay"
         
+                cellElement.appendChild(imgElement)
                 cellElement.appendChild(selectedOverlay)
 
                 rowElement.appendChild(cellElement)
@@ -68,23 +69,23 @@ class Chess{
             
             // Loop through each cell of the row
             for (let j = 0; j < row.cells.length; j++) {
-            const cell = row.cells[j];
+            const cellElement = row.cells[j];
             const cellState = this.boardState[i][j]
-            if(cellState){
-                let imgElement = document.createElement("img")
-                imgElement.src = `pieces/${cellState}.png`
-                cell.appendChild(imgElement)
+
+            cellElement.children[0].src = `pieces/${cellState}.png`
+
+            if(cellState[0]=="w"){
+                cellElement.children[0].style.transform = "rotate(90deg)"
             }
-            else if(cell.firstChild){
-                cell.firstChild.remove()
+            else if(cellState[0]=="b"){
+                cellElement.children[0].style.transform = "rotate(-90deg)"
             }
-            
             }
         }
     }
     selectPiece(r,c){
         if(!this.selectedPiece){
-            this.boardElement.rows[r].cells[c].firstChild.style.display="block";
+            this.boardElement.rows[r].cells[c].children[1].style.display="block";
     
             this.selectedPiece = {r:r,c:c}
         }
@@ -93,7 +94,7 @@ class Chess{
         this.boardState[r][c] = this.boardState[this.selectedPiece.r][this.selectedPiece.c]
         this.boardState[this.selectedPiece.r][this.selectedPiece.c] = false
 
-        this.boardElement.rows[this.selectedPiece.r].cells[this.selectedPiece.c].firstChild.style.display="none";
+        this.boardElement.rows[this.selectedPiece.r].cells[this.selectedPiece.c].children[1].style.display="none";
         this.selectedPiece = false
         this.update()
     }
@@ -114,6 +115,32 @@ document.addEventListener("click",(e)=>{
     }
     console.log(isPiece)
 })
+
+const socket = io();
+
+
+socket.emit("joined");
+
+
+document.getElementById("start-btn").addEventListener("click", () => {
+    socket.emit("newPlayer", "");
+    console.log("Click")
+  });
+
+
+socket.on("newPlayer", (data) => {
+    players++;
+  });
+
+socket.on("joined", (users) => {
+    users.forEach((player, index) => {
+      //players.push(new Player(index, player.name, player.pos, player.img));
+      let alreadyPlaying = new Player(player.x, player.y, 20, player.color, controls.WASD,player.id)
+      players.push(alreadyPlaying)
+      console.log(player.id+" was playing");
+    });
+  });
+
 
 /*
 

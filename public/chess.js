@@ -1,4 +1,12 @@
+let boardContainer = document.getElementById("boardContainer")
+
+let infoText = document.getElementById("info")
+
+let joinButton = document.getElementById("start-btn")
+
 let players = 0
+
+let turn = "White"
 
 let color = {
     dark: "#88AA22",
@@ -57,7 +65,7 @@ class Chess{
             }
         }
         
-        document.body.appendChild(this.boardElement)
+        boardContainer.appendChild(this.boardElement)
 
     }
 
@@ -97,6 +105,13 @@ class Chess{
         this.boardElement.rows[this.selectedPiece.r].cells[this.selectedPiece.c].children[1].style.display="none";
         this.selectedPiece = false
         this.update()
+        if(turn == "White") {
+            turn = "Black";
+        }
+        else if(turn == "Black") {
+            turn = "White";
+        }
+        //socket.emit("updateBoard",{state:this.boardState,turn:turn})
     }
 }
 
@@ -108,10 +123,12 @@ document.addEventListener("click",(e)=>{
     console.log([row,column])
     let isPiece = chess.boardState[row][column]
     if(chess.selectedPiece){
-        chess.movePiece(row,column)
+        //chess.movePiece(row,column)
+        socket.emit("movePiece",{row:row,column:column})
     }
     else if(isPiece){
-        chess.selectPiece(row,column)
+        //chess.selectPiece(row,column)
+        socket.emit("selectPiece",{row:row,column:column})
     }
     console.log(isPiece)
 })
@@ -124,24 +141,40 @@ socket.emit("joined");
 
 document.getElementById("start-btn").addEventListener("click", () => {
     socket.emit("newPlayer", "");
-    console.log("Click")
+    joinButton.remove()
   });
 
 
 socket.on("newPlayer", (data) => {
-    players++;
+    players=data;
+    if(players == 1){
+        infoText.innerHTML = "Waiting for player 2..."
+    }
+    else if(players == 2) {
+        infoText.innerHTML = "White moves"
+        chess.update()
+    }
   });
 
-socket.on("joined", (users) => {
-    users.forEach((player, index) => {
-      //players.push(new Player(index, player.name, player.pos, player.img));
-      let alreadyPlaying = new Player(player.x, player.y, 20, player.color, controls.WASD,player.id)
-      players.push(alreadyPlaying)
-      console.log(player.id+" was playing");
-    });
+socket.on("joined", (data) => {
+    console.log("User joined")
   });
 
+socket.on("movePiece", (data) => {
+    chess.movePiece(data.row,data.column)
+})
 
+socket.on("selectPiece", (data) => {
+    chess.selectPiece(data.row,data.column)
+})
+
+socket.on("updateBoard", (data) => {
+    console.log("board updated")
+    chess.boardState = data["state"]
+    turn = data["turn"]
+    infoText.innerHTML = turn+" moves"
+    chess.update()
+})
 /*
 
 socket.on('updatePlayer', (data) => {

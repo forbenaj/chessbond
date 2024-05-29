@@ -17,12 +17,26 @@ io.on('connection', (socket) => {
   const userId = socket.id;
 
   socket.on("newPlayer", (data) => {
+    console.log("newPlayer (server.js)")
     players++;
     io.emit("newPlayer", players);
   });
 
   socket.on("joined", () => {
-    socket.emit("joined", players);
+    socket.emit("joined", "");
+  });
+
+  
+  socket.on("movePiece", (data) => {
+    io.emit("movePiece", data);
+  })
+  
+  socket.on("selectPiece", (data) => {
+    io.emit("selectPiece", data);
+  })
+
+  socket.on("updateBoard", (data) => {
+    io.emit("updateBoard", data);
   });
 
   // Create a unique user ID for the connected user

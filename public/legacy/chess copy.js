@@ -32,13 +32,12 @@ class Chess{
             ['wr', 'wp', false, false, false, false, 'bp', 'br']
     ]
         this.selectedPiece = false;
-        //this.createBoard()
-        //this.resize()
+        this.createBoard()
+        this.resize()
         
     }
     createBoard(){
-        let jStart = player=="white"?0:4
-        let jEnd = player=="white"?4:0
+
         
         for (let i = 0; i < this.boardState.length; i++) {
 
@@ -47,7 +46,7 @@ class Chess{
 
             this.boardElement.appendChild(rowElement)
             
-            for (let j = jStart; j < this.boardState[i].length-jEnd; j++) {
+            for (let j = 0; j < this.boardState[i].length; j++) {
                 let cellElement = document.createElement("td")
 
                 let isDark = (i+j) % 2 == 0
@@ -74,9 +73,6 @@ class Chess{
     }
 
     update(){
-
-        let jStart = player=="white"?0:4
-        let jEnd = player=="white"?4:0
         
         // Loop through each row of the table
         for (let i = 0; i < this.boardElement.rows.length; i++) {
@@ -85,7 +81,7 @@ class Chess{
             // Loop through each cell of the row
             for (let j = 0; j < row.cells.length; j++) {
             const cellElement = row.cells[j];
-            const cellState = this.boardState[i][j+jStart]
+            const cellState = this.boardState[i][j]
 
             cellElement.children[0].src = `pieces/${cellState}.png`
 
@@ -149,10 +145,10 @@ class Chess{
     }
     resize(corner){
         let size = (window.innerHeight-50)
-        /*if(corner=="black"){
+        if(corner=="black"){
             this.boardElement.style.right = (size/2)+"px";
-        }*/
-        this.boardElement.style.width = (size/2)+"px"
+        }
+        this.boardElement.style.width = size+"px"
         this.boardElement.style.height = size+"px"
     }
 }
@@ -186,9 +182,8 @@ document.getElementById("start-btn").addEventListener("click", () => {
     console.log(players)
     if(players == 1) {
         player = "black"
+        chess.resize(player)
     }
-    chess.createBoard()
-    chess.resize(player)
     joinButton.remove()
   });
 

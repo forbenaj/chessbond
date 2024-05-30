@@ -1,5 +1,3 @@
-let boardContainer = document.getElementById("boardContainer")
-
 let infoText = document.getElementById("info")
 
 let joinButton = document.getElementById("start-btn")
@@ -20,6 +18,8 @@ class Chess{
     constructor(){
         this.boardElement = document.createElement("table")
         this.boardElement.id = "board"
+
+        this.size = window.innerHeight-50
         
         this.boardState = [
             ['wr', 'wp', false, false, false, false, 'bp', 'br'],
@@ -32,13 +32,12 @@ class Chess{
             ['wr', 'wp', false, false, false, false, 'bp', 'br']
     ]
         this.selectedPiece = false;
-        //this.createBoard()
-        //this.resize()
+        this.createBoard()
+        this.resize()
         
     }
     createBoard(){
-        let jStart = player=="white"?0:4
-        let jEnd = player=="white"?4:0
+
         
         for (let i = 0; i < this.boardState.length; i++) {
 
@@ -47,7 +46,7 @@ class Chess{
 
             this.boardElement.appendChild(rowElement)
             
-            for (let j = jStart; j < this.boardState[i].length-jEnd; j++) {
+            for (let j = 0; j < this.boardState[i].length; j++) {
                 let cellElement = document.createElement("td")
 
                 let isDark = (i+j) % 2 == 0
@@ -69,14 +68,11 @@ class Chess{
             }
         }
         
-        boardContainer.appendChild(this.boardElement)
+        document.body.appendChild(this.boardElement)
 
     }
 
     update(){
-
-        let jStart = player=="white"?0:4
-        let jEnd = player=="white"?4:0
         
         // Loop through each row of the table
         for (let i = 0; i < this.boardElement.rows.length; i++) {
@@ -85,7 +81,7 @@ class Chess{
             // Loop through each cell of the row
             for (let j = 0; j < row.cells.length; j++) {
             const cellElement = row.cells[j];
-            const cellState = this.boardState[i][j+jStart]
+            const cellState = this.boardState[i][j]
 
             cellElement.children[0].src = `pieces/${cellState}.png`
 
@@ -147,13 +143,16 @@ class Chess{
         infoText.innerHTML = turn+" moves"
         //socket.emit("updateBoard",{state:this.boardState,turn:turn})
     }
-    resize(corner){
-        let size = (window.innerHeight-50)
-        /*if(corner=="black"){
-            this.boardElement.style.right = (size/2)+"px";
-        }*/
-        this.boardElement.style.width = (size/2)+"px"
-        this.boardElement.style.height = size+"px"
+    resize(){
+        this.size = window.innerHeight-50
+        if(player=="white"){
+            this.boardElement.style.right = -(this.size/2)+"px"//(this.size+this.size/2)+"px"
+        }
+        else if(player=="black"){
+            this.boardElement.style.left = -(this.size/2)+"px"
+        }
+        this.boardElement.style.width = this.size+"px"
+        this.boardElement.style.height = this.size+"px"
     }
 }
 
@@ -187,8 +186,7 @@ document.getElementById("start-btn").addEventListener("click", () => {
     if(players == 1) {
         player = "black"
     }
-    chess.createBoard()
-    chess.resize(player)
+    chess.resize()
     joinButton.remove()
   });
 
@@ -224,79 +222,3 @@ socket.on("updateBoard", (data) => {
     infoText.innerHTML = turn+" moves"
     chess.update()
 })
-/*
-
-socket.on('updatePlayer', (data) => {
-data.forEach((player, index) => {
-    //players.push(new Player(index, player.name, player.pos, player.img));
-    let id = player.id
-    if(id == currentPlayer.id){}
-    else{
-        let x = player.x
-        let y = player.y
-        players[id].x = x;
-        players[id].y = y;
-        //console.log(player);
-    }
-    });
-});
-
-socket.on('catchBall', (data) =>{
-    let id = data.id
-    let x = data.x
-    let y = data.y
-    players[id].score ++;
-    blackBall.x = x
-    blackBall.y = y
-
-})
-
-
-
-
-createjs.Ticker.framerate =  30;
-createjs.Ticker.on("tick", function (event) {
-    const delta = (event.delta/16.67) * timeScale;
-    stage.removeAllChildren();
-
-    blackBall.draw()
-    for(i=0;i< players.length;i++){
-
-        let player = players[i]
-        if(player.id==currentPlayer.id){
-            player.controls();
-            player.update(delta);
-            player.draw();
-
-            if (blackBall.active) {
-                
-                const distance = Math.sqrt((player.x - blackBall.x) ** 2 + (player.y - blackBall.y) ** 2);
-
-                if (distance <= player.radius + blackBall.radius) {
-                    blackBall.respawn();
-                    socket.emit("catchBall",{
-                        x:blackBall.x,
-                        y:blackBall.y,
-                        id:player.id
-                    })
-                    //new Audio(catchSounds[i]).play()
-                }
-
-            }
-            
-            socket.emit("updatePlayer", {
-                x:player.x,
-                y:player.y,
-                id:player.id
-            });
-        }
-        else{
-            player.draw();
-        }
-
-    }
-
-
-    stage.update();
- 
-});*/

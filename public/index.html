@@ -2,20 +2,25 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chess</title>
   <style>
+    html, body {
+      margin: 0;
+      overflow: hidden;
+    }
     h1 {
       font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
       padding:0px;
       margin:0px;
     }
-    #boardContainer {
+    #titlesContainer {
       width:100%;
       height:100%;
       overflow: hidden;
     }
     #board {
-      position:relative;
+      position:fixed;
     }
     #board td{
       position:relative;
@@ -54,7 +59,7 @@
   </style>
 </head>
 <body>
-  <div id="boardContainer">
+  <div id="titlesContainer">
     <h1 id="info">No players</h1>
     <button id="start-btn">Join</button>
   </div>

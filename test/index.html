@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+<title>Pinch and Spread Gesture</title>
+<style>
+  #distance {
+    font-size: 24px;
+    margin-top: 20px;
+  }
+</style>
+</head>
+<body>
+  <div id="distance">0</div>
+  <script>
+
+    let touchStartDistance = 0;
+    
+    document.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 2) {
+        touchStartDistance = getDistanceBetweenTouches(e.touches[0], e.touches[1]);
+      }
+    });
+
+    document.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 2) {
+        const touchMoveDistance = getDistanceBetweenTouches(e.touches[0], e.touches[1]);
+        const pinchSpreadDistance = Math.abs(touchMoveDistance - touchStartDistance);
+        document.getElementById('distance').textContent = pinchSpreadDistance.toFixed(2);
+      }
+    });
+
+    function getDistanceBetweenTouches(touch1, touch2) {
+      const dx = touch2.clientX - touch1.clientX;
+      const dy = touch2.clientY - touch1.clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+  </script>
+
+<script src="/socket.io/socket.io.js"></script>
+</body>
+</html>

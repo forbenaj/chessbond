@@ -106,19 +106,23 @@ class Chess{
         let fromElement = this.boardElement.rows[this.selectedPiece.r].cells[this.selectedPiece.c]
         let toElement = this.boardElement.rows[r].cells[c]
 
+        if(fromElement == toElement){
+            fromElement.children[1].style.display="none";
+            this.selectedPiece = false
+            console.log("Same piece")
+            return
+        }
+
         let rect1 = fromElement.getBoundingClientRect()
         let rect2 = toElement.getBoundingClientRect()
 
-        let transform = {
+        let pos = {
             x: rect2.left - rect1.left,
             y: rect2.top - rect1.top,
-            rotation: this.boardState[this.selectedPiece.r][this.selectedPiece.c][0] == "w"? 90 : -90
         }
 
-        //fromElement.children[0].style.transform=`translate(${transform.x}px, ${transform.y}px) rotate(${transform.rotation}deg)`;
-
-        fromElement.children[0].style.left = transform.x+"px"
-        fromElement.children[0].style.top = transform.y+"px"
+        fromElement.children[0].style.left = pos.x+"px"
+        fromElement.children[0].style.top = pos.y+"px"
 
         fromElement.addEventListener('transitionend', () => {
             fromElement.children[0].style.left = 0
@@ -130,23 +134,22 @@ class Chess{
         this.boardState[r][c] = this.boardState[this.selectedPiece.r][this.selectedPiece.c]
         this.boardState[this.selectedPiece.r][this.selectedPiece.c] = false
 
-        this.boardElement.rows[this.selectedPiece.r].cells[this.selectedPiece.c].children[1].style.display="none";
+        fromElement.children[1].style.display="none";
 
         this.selectedPiece = false
-        //this.update()
+
         if(turn == "White") {
             turn = "Black";
         }
         else if(turn == "Black") {
             turn = "White";
         }
+
         infoText.innerHTML = turn+" moves"
-        //socket.emit("updateBoard",{state:this.boardState,turn:turn})
     }
     resize(){
-        this.size = window.innerHeight-50
         if(player=="white"){
-            this.boardElement.style.right = -(this.size/2)+"px"//(this.size+this.size/2)+"px"
+            this.boardElement.style.right = -(this.size/2)+"px"
         }
         else if(player=="black"){
             this.boardElement.style.left = -(this.size/2)+"px"
@@ -164,11 +167,9 @@ document.addEventListener("click",(e)=>{
     console.log([row,column])
     let isPiece = chess.boardState[row][column]
     if(chess.selectedPiece){
-        //chess.movePiece(row,column)
         socket.emit("movePiece",{row:row,column:column})
     }
     else if(isPiece){
-        //chess.selectPiece(row,column)
         socket.emit("selectPiece",{row:row,column:column})
     }
     console.log(isPiece)
@@ -189,6 +190,32 @@ document.getElementById("start-btn").addEventListener("click", () => {
     chess.resize()
     joinButton.remove()
   });
+
+
+let touchStartDistance = 0;
+let currentSize = chess.size;
+
+document.addEventListener('touchstart', (e) => {
+if (e.touches.length === 2) {
+    currentSize = chess.size;
+    touchStartDistance = getDistanceBetweenTouches(e.touches[0], e.touches[1]);
+}
+});
+
+document.addEventListener('touchmove', (e) => {
+if (e.touches.length === 2) {
+    const touchMoveDistance = getDistanceBetweenTouches(e.touches[0], e.touches[1]);
+    const pinchSpreadDistance = touchMoveDistance - touchStartDistance;
+    chess.size = currentSize+pinchSpreadDistance
+    chess.resize()
+}
+});
+
+function getDistanceBetweenTouches(touch1, touch2) {
+    const dx = touch2.clientX - touch1.clientX;
+    const dy = touch2.clientY - touch1.clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+}
 
 
 socket.on("newPlayer", (data) => {

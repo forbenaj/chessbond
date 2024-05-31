@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
   <title>Chess</title>
   <style>
     html, body {
@@ -21,6 +21,8 @@
     }
     #board {
       position:fixed;
+      top:50%;
+      transform:translateY(-50%)
     }
     #board td{
       position:relative;

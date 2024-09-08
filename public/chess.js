@@ -180,6 +180,8 @@ const socket = io();
 
 socket.emit("joined");
 
+const peer = new Peer();
+
 
 document.getElementById("start-btn").addEventListener("click", () => {
     socket.emit("newPlayer", "");

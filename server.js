@@ -7,7 +7,7 @@ const server = http.createServer(app);
 const io = socketIo(server);
 
 // Serve static files (HTML, CSS, JS)
-app.use(express.static(__dirname + '/public'));
+app.use(express.static(__dirname + '/rtc_test'));
 
 var players = 0;
 
@@ -26,6 +26,9 @@ io.on('connection', (socket) => {
     socket.emit("joined", "");
   });
 
+  socket.on('peer-id', (peerId) => {
+    socket.broadcast.emit('peer-id', peerId);
+  });
   
   socket.on("movePiece", (data) => {
     io.emit("movePiece", data);

@@ -175,12 +175,46 @@ document.addEventListener("click",(e)=>{
     console.log(isPiece)
 })
 
-const socket = io();
+//const socket = io();
 
 
-socket.emit("joined");
+//socket.emit("joined");
 
-const peer = new Peer();
+var friend = null
+
+function connectToPeer(){
+    friend_id = document.getElementById('id-input').value
+    friend = peer.connect(friend_id);
+    
+    
+    friend.on('open', function() {
+        console.log("Connection open.")
+        // Receive messages
+        friend.on('data', function(data) {
+          console.log('Received', data);
+        });
+    
+        // Send messages
+        friend.send('Hello!');
+      });
+
+}
+
+var generated_id = random_string(5)
+
+var peer = new Peer(generated_id);
+
+let myIdElement = document.getElementById('my_id').innerText = generated_id
+
+
+peer.on('open', function(id) {
+    console.log('Connected. My peer ID is: ' + id);
+  });
+
+peer.on('connection', function(conn) {
+    console.log("New peer connected: "+conn)
+});
+
 
 
 document.getElementById("start-btn").addEventListener("click", () => {
@@ -251,3 +285,15 @@ socket.on("updateBoard", (data) => {
     infoText.innerHTML = turn+" moves"
     chess.update()
 })
+
+
+function random_string(length) {
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUBWXYZAAAAEEEEEIIIIOOOUU';
+    
+    for (let i = 0; i < length; i++) {
+        const randomInd = Math.floor(Math.random() * characters.length);
+        result += characters.charAt(randomInd);
+    }
+    return result;
+}

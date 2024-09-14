@@ -73,6 +73,12 @@
       padding: 20px;
       z-index: 3;
     }
+    #introMenu {
+      display:flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
     #id-input{
       font-size: 30px;
       margin: 15px;
@@ -82,15 +88,23 @@
       padding:15px;
       margin: 15px;
     }
+    #inputErrorMessage{
+      color: red;
+      margin:0px;
+    }
   </style>
 </head>
 <body>
   <div id="mainMenu">
-    <h3 id="info">Show your friend your ID:</h3>
-    <h1 id="my_id"></h1>
-    <h4 id="info">or:</h4>
-    <input id="id-input" type="text" placeholder="Insert peer ID">
-    <button id="start-btn" onclick="connectToPeer()">Join</button>
+    <div id="introMenu">
+      <h3 id="info">Show your friend your ID:</h3>
+      <h1 id="my_id"></h1>
+      <h4 id="info">or:</h4>
+      <input id="id-input" type="text" placeholder="Insert peer ID" maxlength="3">
+      <h4 id="inputErrorMessage"></h4>
+      <button id="start-btn" onclick="connectToPeer()">Join</button>
+    </div>
+    <h1 id="connectedTitle"></h1>
   </div>
   <script src="chess.js"></script>
 </body>

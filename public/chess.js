@@ -2,6 +2,10 @@ let infoText = document.getElementById("info")
 
 let joinButton = document.getElementById("start-btn")
 
+let mainMenu = document.getElementById("mainMenu")
+let connectedTitle = document.getElementById("connectedTitle")
+let introMenu = document.getElementById("introMenu")
+
 let players = 0
 
 let player = "white";
@@ -161,7 +165,7 @@ class Chess{
 
 let chess = new Chess()
 
-document.addEventListener("click",(e)=>{
+/*document.addEventListener("click",(e)=>{
     row = e.target.getAttribute("r")
     column = e.target.getAttribute("c")
     console.log([row,column])
@@ -173,51 +177,88 @@ document.addEventListener("click",(e)=>{
         socket.emit("selectPiece",{row:row,column:column})
     }
     console.log(isPiece)
-})
+})*/
 
 //const socket = io();
 
 
 //socket.emit("joined");
 
-var friend = null
+let myIdElement = document.getElementById('my_id')
+let idInput = document.getElementById('id-input')
 
-function connectToPeer(){
-    friend_id = document.getElementById('id-input').value
-    friend = peer.connect(friend_id);
-    
-    
-    friend.on('open', function() {
-        console.log("Connection open.")
-        // Receive messages
-        friend.on('data', function(data) {
-          console.log('Received', data);
-        });
-    
-        // Send messages
-        friend.send('Hello!');
-      });
+document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('uppercaseInput');
 
-}
+    idInput.addEventListener('input', () => {
+        idInput.value = idInput.value.toUpperCase();
+    });
+});
 
-var generated_id = random_string(5)
-
-var peer = new Peer(generated_id);
-
-let myIdElement = document.getElementById('my_id').innerText = generated_id
+var myself = new Peer(random_string(3));
+var conn = null
 
 
-peer.on('open', function(id) {
+
+
+myself.on('open', function(id) {
     console.log('Connected. My peer ID is: ' + id);
+    myIdElement.innerText = myself.id
   });
 
-peer.on('connection', function(conn) {
-    console.log("New peer connected: "+conn)
+myself.on('connection', function(recievingConn) {
+    console.log("New peer connected: "+recievingConn.peer)
+    conn = recievingConn
+    conn.on('data', function(data) {
+        console.log(conn.peer+': '+ data);
+    });
+    succesfullyConnected()
 });
 
 
 
-document.getElementById("start-btn").addEventListener("click", () => {
+function connectToPeer(){
+    let friend_id = idInput.value
+    if(friend_id==myself.id){
+        inputErrorMessage.innerText = "That's yourself!"
+        return
+    }
+    conn = myself.connect(friend_id);
+
+    //socket.emit("newPlayer", "");
+
+    //console.log(players)
+    if(players == 1) {
+        player = "black"
+    }
+    chess.resize()
+    //joinButton.remove()
+
+    conn.on('open', function() {
+        succesfullyConnected()
+        conn.on('data', function(data) {
+          console.log(conn.peer+': '+ data);
+        });
+        
+      });
+}
+
+function succesfullyConnected(){
+    console.log("You connected to "+conn.peer)
+
+    connectedTitle.innerHTML = "Connected to "+conn.peer+"!"
+    introMenu.remove()
+    mainMenu.addEventListener("click",(e)=>{
+        mainMenu.remove()
+    })
+
+    setTimeout(() => {
+        mainMenu.remove()
+    }, 2000);
+
+}
+
+/*document.getElementById("start-btn").addEventListener("click", () => {
     socket.emit("newPlayer", "");
     console.log(players)
     if(players == 1) {
@@ -225,7 +266,7 @@ document.getElementById("start-btn").addEventListener("click", () => {
     }
     chess.resize()
     joinButton.remove()
-  });
+  });*/
 
 
 let touchStartDistance = 0;
@@ -254,7 +295,7 @@ function getDistanceBetweenTouches(touch1, touch2) {
 }
 
 
-socket.on("newPlayer", (data) => {
+/*socket.on("newPlayer", (data) => {
     players=data;
     if(players == 1){
         infoText.innerHTML = "Waiting for player 2..."
@@ -285,15 +326,22 @@ socket.on("updateBoard", (data) => {
     infoText.innerHTML = turn+" moves"
     chess.update()
 })
-
+*/
 
 function random_string(length) {
     let result = '';
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUBWXYZAAAAEEEEEIIIIOOOUU';
+    //const characters = 'ABCDEFGHIJKLMNOPQRSTUBWXYZAAAAEEEEEIIIIOOOUU';
+    //const characters = 'ABCDEFGHIJKLMNOPQRSTUBWXYZ';
+    const consonants = 'BDFLMNPRST';
+    const vowels = 'AEIOU';
+
+    result += consonants.charAt( Math.floor(Math.random() * consonants.length))
+    result += vowels.charAt( Math.floor(Math.random() * vowels.length))
+    result += consonants.charAt( Math.floor(Math.random() * consonants.length))
     
-    for (let i = 0; i < length; i++) {
+    /*for (let i = 0; i < length; i++) {
         const randomInd = Math.floor(Math.random() * characters.length);
         result += characters.charAt(randomInd);
-    }
+    }*/
     return result;
 }

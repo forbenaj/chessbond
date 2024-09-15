@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+  <title>Chess</title>
+  <style>
+    html, body {
+      margin: 0;
+      overflow: hidden;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+      padding:0px;
+      margin:10px;
+    }
+    h1{
+      font-size: 45px;
+    }
+    h2{
+      font-size: 30px;
+    }
+    h3{
+      font-size: 25px;
+    }
+    h4{
+      font-size: 20px;
+    }
+    #board {
+      position:fixed;
+      top:50%;
+      transform:translateY(-50%)
+    }
+    #board td{
+      position:relative;
+      border:1px solid black;
+      background-size:contain;
+    }
+    #board img{
+      pointer-events:none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width:100%;
+      height:100%;
+      transition: top 0.5s ease, left 0.5s ease;
+      z-index: 2;
+    }
+    .selectedOverlay{
+      position: absolute;
+      top: 0;
+      left: 0;
+      display:none;
+      width:100%;
+      height:100%;
+      background-color: rgba(255, 255, 0, 0.5);
+      pointer-events:none;
+    }
+    #mainMenu {
+      display:flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      width: 80%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: white;
+      border: 1px solid black;
+      border-radius: 15px;
+      padding: 20px;
+      z-index: 3;
+    }
+    #introMenu {
+      display:flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    #id-input{
+      font-size: 30px;
+      width: 80%;
+      margin: 15px;
+    }
+    #start-btn{
+      font-size:50px;
+      padding:15px;
+      margin: 15px;
+    }
+    #inputErrorMessage{
+      color: red;
+      margin:0px;
+    }
+  </style>
+</head>
+<body>
+  <div id="titlesContainer">
+    <h1 id="info">No players</h1>
+  </div>
+  <div id="mainMenu">
+    <div id="introMenu">
+      <h3 id="info">Show your friend your ID:</h3>
+      <h1 id="my_id"></h1>
+      <h4 id="info">or:</h4>
+      <input id="id-input" type="text" placeholder="Insert peer ID" maxlength="3">
+      <h4 id="inputErrorMessage"></h4>
+      <button id="start-btn" onclick="connectToPeer()">Join</button>
+    </div>
+    <h1 id="connectedTitle"></h1>
+  </div>
+  <script src="chess.js"></script>
+</body>
+</html>

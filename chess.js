@@ -24,6 +24,8 @@ class Chess{
         this.boardElement.id = "board"
 
         this.size = window.innerHeight-50
+        this.gapPercentage = 10
+        this.gap = this.size/2+this.size/8*0.01*this.gapPercentage
         
         this.boardState = [
             ['wr', 'wp', false, false, false, false, 'bp', 'br'],
@@ -152,11 +154,12 @@ class Chess{
         infoText.innerHTML = turn+" moves"
     }
     resize(){
+        this.gap = this.size/8*0.01*this.gapPercentage
         if(player=="white"){
-            this.boardElement.style.right = -(this.size/2)+"px"
+            this.boardElement.style.right = -(this.size/2+this.gap)+"px"
         }
         else if(player=="black"){
-            this.boardElement.style.left = -(this.size/2)+"px"
+            this.boardElement.style.left = -(this.size/2+this.gap)+"px"
         }
         this.boardElement.style.width = this.size+"px"
         this.boardElement.style.height = this.size+"px"
@@ -260,10 +263,15 @@ function connectToPeer(){
         inputErrorMessage.innerText = "That's yourself!"
         return
     }
+    if(!friend_id){
+        inputErrorMessage.innerText = "Insert a peer ID"
+        return
+    }
     conn = myself.connect(friend_id);
 
     conn.on('open', function() {
         succesfullyConnected()
+        document.documentElement.requestFullscreen();
         player="white"
         conn.on('data', function(data) {
           console.log(conn.peer+': '+ data);
@@ -278,6 +286,7 @@ function connectToPeer(){
 
 function succesfullyConnected(){
     console.log("You connected to "+conn.peer)
+    checkFullscreen()
 
     connectedTitle.innerHTML = "Connected to "+conn.peer+"!"
     introMenu.remove()
@@ -303,12 +312,20 @@ function succesfullyConnected(){
 }
 
 let touchStartDistance = 0;
+let startX, startY, endX, endY;
 let currentSize = chess.size;
+let currentGap = chess.gapPercentage;
+
 
 document.addEventListener('touchstart', (e) => {
 if (e.touches.length === 2) {
     currentSize = chess.size;
+    currentGap = chess.gap;
     touchStartDistance = getDistanceBetweenTouches(e.touches[0], e.touches[1]);
+    const touch1 = e.touches[0];
+    const touch2 = e.touches[1];
+    startX = (touch1.clientX + touch2.clientX) / 2;
+    startY = (touch1.clientY + touch2.clientY) / 2;
 }
 });
 
@@ -316,7 +333,25 @@ document.addEventListener('touchmove', (e) => {
 if (e.touches.length === 2) {
     const touchMoveDistance = getDistanceBetweenTouches(e.touches[0], e.touches[1]);
     const pinchSpreadDistance = touchMoveDistance - touchStartDistance;
-    chess.size = currentSize+pinchSpreadDistance
+
+    let newSize = currentSize+pinchSpreadDistance
+
+    if(newSize < window.screen.height){
+        chess.size = currentSize+pinchSpreadDistance
+    }
+
+    const touch1 = e.touches[0];
+    const touch2 = e.touches[1];
+    endX = (touch1.clientX + touch2.clientX) / 2; // Average position
+    endY = (touch1.clientY + touch2.clientY) / 2; // Average position
+    const distanceX = endX - startX;
+    const distanceY = endY - startY;
+
+    let newGap = player == "white"? currentGap+distanceX:currentGap-distanceX
+
+    if(newGap > 0 && newGap < 50){
+        chess.gapPercentage = newGap
+    }
     chess.resize()
 }
 });
@@ -344,4 +379,30 @@ function random_string(length) {
         result += characters.charAt(randomInd);
     }*/
     return result;
+}
+
+function checkFullscreen() {
+    console.log("Checking fullscreen status...")
+    if (!document.fullscreenElement) {
+        goToFullscreen.style.display = 'flex';
+        console.log("Fullscreen off")
+    } else {
+        goToFullscreen.style.display = 'none';
+    }
+}
+
+addEventListener("fullscreenchange", (event) => {
+    console.log(event)
+    checkFullscreen()
+});
+
+function setFixedInterval(callback, interval, times) {
+    let count = 0;
+    const intervalId = setInterval(() => {
+        callback();
+        count++;
+        if (count >= times) {
+            clearInterval(intervalId);
+        }
+    }, interval);
 }

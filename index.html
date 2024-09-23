@@ -123,14 +123,11 @@
   </style>
 </head>
 <body>
-  <div id="titlesContainer">
-    <h1 id="info">No players</h1>
-  </div>
   <div id="mainMenu">
     <div id="introMenu">
-      <h3 id="info">Show your friend your ID:</h3>
+      <h3>Show your friend your ID:</h3>
       <h1 id="my_id"></h1>
-      <h4 id="info">or:</h4>
+      <h4>or:</h4>
       <input id="id-input" type="text" placeholder="Insert peer ID" maxlength="3">
       <h4 id="inputErrorMessage"></h4>
       <button id="start-btn" onclick="connectToPeer()">Join</button>
@@ -141,5 +138,7 @@
     <h2>Press to go fullscreen</h2>
   </div>
   <script src="chess.js"></script>
+  <script src="main.js"></script>
+  <script src="p2p.js"></script>
 </body>
 </html>

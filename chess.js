@@ -1,32 +1,25 @@
-let infoText = document.getElementById("info")
-
 let joinButton = document.getElementById("start-btn")
 
 let mainMenu = document.getElementById("mainMenu")
 let connectedTitle = document.getElementById("connectedTitle")
 let introMenu = document.getElementById("introMenu")
 
-let players = 0
-
 let player = "white";
-
 let turn = "White"
 
-let color = {
-    dark: "#88AA22",
-    light: "#EEEECC"
-}
-
+let forceFullscreen = false
 
 class Chess{
-    constructor(){
+    constructor(darkColor="#88AA22",lightColor="#EEEECC"){
         this.boardElement = document.createElement("table")
         this.boardElement.id = "board"
-
+        this.boardColor = {
+            dark: darkColor,
+            light: lightColor
+        }
         this.size = window.innerHeight-50
         this.gapPercentage = 10
         this.gap = this.size/2+this.size/8*0.01*this.gapPercentage
-        
         this.boardState = [
             ['wr', 'wp', false, false, false, false, 'bp', 'br'],
             ['wn', 'wp', false, false, false, false, 'bp', 'bn'],
@@ -36,86 +29,69 @@ class Chess{
             ['wb', 'wp', false, false, false, false, 'bp', 'bb'],
             ['wn', 'wp', false, false, false, false, 'bp', 'bn'],
             ['wr', 'wp', false, false, false, false, 'bp', 'br']
-    ]
+        ]
         this.selectedPiece = false;
         this.createBoard()
         this.resize()
-        
     }
     createBoard(){
-
-        
         for (let i = 0; i < this.boardState.length; i++) {
-
             let rowElement = document.createElement("tr")
             rowElement.className = "row"
-
             this.boardElement.appendChild(rowElement)
-            
+
             for (let j = 0; j < this.boardState[i].length; j++) {
                 let cellElement = document.createElement("td")
-
                 let isDark = (i+j) % 2 == 0
-        
-                cellElement.style.backgroundColor = isDark? color.dark : color.light
-        
+
+                cellElement.style.backgroundColor = isDark? this.boardColor.dark : this.boardColor.light
                 cellElement.setAttribute("r",i)
                 cellElement.setAttribute("c",j)
 
-                let imgElement = document.createElement("img")                
-        
+                let imgElement = document.createElement("img")         
                 let selectedOverlay = document.createElement("div")
                 selectedOverlay.className = "selectedOverlay"
-        
+
                 cellElement.appendChild(imgElement)
                 cellElement.appendChild(selectedOverlay)
-
                 rowElement.appendChild(cellElement)
             }
         }
-        
         document.body.appendChild(this.boardElement)
-
     }
 
     update(){
-        
-        // Loop through each row of the table
         for (let i = 0; i < this.boardElement.rows.length; i++) {
             const row = this.boardElement.rows[i];
             
-            // Loop through each cell of the row
             for (let j = 0; j < row.cells.length; j++) {
-            const cellElement = row.cells[j];
-            const cellState = this.boardState[i][j]
+                const cellElement = row.cells[j];
+                const cellState = this.boardState[i][j]
 
-            cellElement.children[0].src = `pieces/${cellState}.png`
+                cellElement.children[0].src = `pieces/${cellState}.png`
 
-            if(cellState[0]=="w"){
-                cellElement.children[0].style.transform = "rotate(90deg)"
-            }
-            else if(cellState[0]=="b"){
-                cellElement.children[0].style.transform = "rotate(-90deg)"
-            }
+                if(cellState[0]=="w"){
+                    cellElement.children[0].style.transform = "rotate(90deg)"
+                }
+                else if(cellState[0]=="b"){
+                    cellElement.children[0].style.transform = "rotate(-90deg)"
+                }
             }
         }
     }
     selectPiece(r,c){
         if(!this.selectedPiece){
             this.boardElement.rows[r].cells[c].children[1].style.display="block";
-    
             this.selectedPiece = {r:r,c:c}
         }
     }
     movePiece(r,c){
-
         let fromElement = this.boardElement.rows[this.selectedPiece.r].cells[this.selectedPiece.c]
         let toElement = this.boardElement.rows[r].cells[c]
 
         if(fromElement == toElement){
             fromElement.children[1].style.display="none";
             this.selectedPiece = false
-            console.log("Same piece")
             return
         }
 
@@ -150,8 +126,6 @@ class Chess{
         else if(turn == "Black") {
             turn = "White";
         }
-
-        infoText.innerHTML = turn+" moves"
     }
     resize(){
         this.gap = this.size/8*0.01*this.gapPercentage
@@ -168,12 +142,10 @@ class Chess{
 
 let chess = new Chess()
 
-
 function startGame(){
     document.addEventListener("click",(e)=>{
         row = e.target.getAttribute("r")
         column = e.target.getAttribute("c")
-        console.log([row,column])
         let isPiece = chess.boardState[row][column]
         if(chess.selectedPiece){
             conn.send({action: "movePiece", attr: {row:row,column:column}})
@@ -183,7 +155,6 @@ function startGame(){
             conn.send({action: "selectPiece", attr: {row:row,column:column}})
             chess.selectPiece(row,column)
         }
-        console.log(isPiece)
     })
 
     conn.on("data", function(data){
@@ -197,7 +168,6 @@ function startGame(){
             console.log("board updated")
             chess.boardState = data["state"]
             turn = data["turn"]
-            infoText.innerHTML = turn+" moves"
             chess.update()
         }
     })
@@ -213,6 +183,11 @@ document.addEventListener('DOMContentLoaded', () => {
     idInput.addEventListener('input', () => {
         idInput.value = idInput.value.toUpperCase();
     });
+    idInput.addEventListener('keypress', (event) => {
+        if(event.key === "Enter"){
+            joinButton.click()
+        }
+    })
 });
 
 var myself = null
@@ -230,9 +205,6 @@ function connectMyself(){
         console.log("New peer connected: "+recievingConn.peer)
         conn = recievingConn
         player = "black"
-        conn.on('data', function(data) {
-            console.log(conn.peer+': '+ data);
-        });
         succesfullyConnected()
     });
 
@@ -254,9 +226,6 @@ function connectMyself(){
 
 connectMyself()
 
-
-
-
 function connectToPeer(){
     let friend_id = idInput.value
     if(friend_id==myself.id){
@@ -271,12 +240,10 @@ function connectToPeer(){
 
     conn.on('open', function() {
         succesfullyConnected()
-        document.documentElement.requestFullscreen();
+        if(forceFullscreen){
+            document.documentElement.requestFullscreen();
+        }
         player="white"
-        conn.on('data', function(data) {
-          console.log(conn.peer+': '+ data);
-        });
-        
       });
 
       conn.on('error', (err) => {
@@ -286,7 +253,9 @@ function connectToPeer(){
 
 function succesfullyConnected(){
     console.log("You connected to "+conn.peer)
-    checkFullscreen()
+    if(forceFullscreen){
+        checkFullscreen()
+    }
 
     connectedTitle.innerHTML = "Connected to "+conn.peer+"!"
     introMenu.remove()
@@ -294,17 +263,12 @@ function succesfullyConnected(){
         mainMenu.remove()
     })
     
-    if(players == 1) {
-        player = "black"
-    }
-    
     chess.resize()
 
     setTimeout(() => {
         mainMenu.remove()
     }, 2000);
     
-    infoText.innerHTML = "White moves"
     chess.update()
 
     startGame()
@@ -342,8 +306,8 @@ if (e.touches.length === 2) {
 
     const touch1 = e.touches[0];
     const touch2 = e.touches[1];
-    endX = (touch1.clientX + touch2.clientX) / 2; // Average position
-    endY = (touch1.clientY + touch2.clientY) / 2; // Average position
+    endX = (touch1.clientX + touch2.clientX) / 2;
+    endY = (touch1.clientY + touch2.clientY) / 2;
     const distanceX = endX - startX;
     const distanceY = endY - startY;
 
@@ -392,8 +356,9 @@ function checkFullscreen() {
 }
 
 addEventListener("fullscreenchange", (event) => {
-    console.log(event)
-    checkFullscreen()
+    if(forceFullscreen){
+        checkFullscreen()
+    }
 });
 
 function setFixedInterval(callback, interval, times) {

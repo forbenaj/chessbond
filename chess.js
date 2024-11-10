@@ -7,7 +7,7 @@ let introMenu = document.getElementById("introMenu")
 let player = "white";
 let turn = "White"
 
-let forceFullscreen = false
+let forceFullscreen = true
 
 class Chess{
     constructor(darkColor="#88AA22",lightColor="#EEEECC"){
